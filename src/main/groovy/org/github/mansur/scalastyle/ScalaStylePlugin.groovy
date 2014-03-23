@@ -16,13 +16,52 @@ package org.github.mansur.scalastyle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.SourceDirectorySet
+import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.plugins.scala.ScalaPlugin
+import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.TaskInstantiationException
+
 
 /**
  * @author Muhammad Ashraf
  * @since 5/11/13
  */
 class ScalaStylePlugin implements Plugin<Project> {
+
+    Set<SourceSet> testSourceSets
+    Set<SourceSet> mainSourceSets
+
     void apply(Project project) {
+
+        // the scala plugin is required
+        if (!project.plugins.hasPlugin("scala")) {
+            throw new TaskInstantiationException("Scala plugin has to be applied before ScalaStyle plugin")
+        }
+
+        mainSourceSets = [project.sourceSets.main] as Set<SourceSet>
+        testSourceSets = [project.sourceSets.test] as Set<SourceSet>
+
+        def allScalaSourceDirs = mainSourceSets*.allScala.srcDirs.flatten() // as Set<SourceDirectorySet>;
+
+        for (File f: allScalaSourceDirs) {
+            println(f.absolutePath);
+        }
+
+        def scalaDirSets = mainSourceSets*.allScala.flatten()
+        for (SourceDirectorySet dirSet : scalaDirSets) {
+            println(dirSet.name);
+            for (File f : dirSet.files) {
+                println("    " + f.absolutePath);
+            }
+        }
+
+        /*
+        for (Object o : project.plugins.toArray()) {
+            println o.toString()
+        }
+        */
+
         project.configurations.create("scalaStyle")
                 .setVisible(false)
                 .setTransitive(true)
@@ -30,5 +69,8 @@ class ScalaStylePlugin implements Plugin<Project> {
 
         project.task(type: ScalaStyleTask, 'scalaStyle')
         project.tasks.scalaStyle.outputs.upToDateWhen { false }
+
+
+
     }
 }
