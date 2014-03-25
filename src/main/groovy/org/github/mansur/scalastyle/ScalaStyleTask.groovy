@@ -17,6 +17,8 @@ package org.github.mansur.scalastyle
 import org.gradle.api.file.FileTree
 import org.gradle.api.tasks.SourceTask
 import org.gradle.api.tasks.TaskAction
+import org.scalastyle.Directory
+import org.scalastyle.FileSpec
 import org.scalastyle.ScalastyleChecker
 import org.scalastyle.ScalastyleConfiguration
 import org.scalastyle.TextOutput
@@ -44,14 +46,14 @@ class ScalaStyleTask extends SourceTask {
 
     @TaskAction
     def scalastyle() {
-        println("in scalastyle task for " + name);
-        return
+        println("in scalastyle task for " + name)
         extractAndValidateProperties()
         if (!skip) {
             try {
                 def startMs = System.currentTimeMillis()
                 def configuration = ScalastyleConfiguration.readFromXml(configLocation)
-                def messages = new ScalastyleChecker().checkFilesAsJava(configuration, getSource().files.toList())
+                def List<FileSpec> files = Directory.getFilesAsJava(scala.Option.apply(null), getSource().files.asList())
+                def messages = new ScalastyleChecker().checkFilesAsJava(configuration, files)
                 def outputResult = new TextOutput(verbose, quiet).output(messages)
 
                 getLogger().debug("Saving to outputFile={}", project.file(outputFile).getCanonicalPath());
