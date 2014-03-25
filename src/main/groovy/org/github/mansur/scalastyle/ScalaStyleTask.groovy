@@ -28,7 +28,7 @@ import org.scalastyle.XmlOutput
  */
 class ScalaStyleTask extends SourceTask {
     File buildDirectory
-    String configLocation
+    String configLocation = ScalaStylePlugin.DEFAULT_CONFIG_FILE
     String outputFile
     String outputEncoding = "UTF-8"
     Boolean failOnViolation = true
@@ -36,11 +36,6 @@ class ScalaStyleTask extends SourceTask {
     Boolean skip = false
     Boolean verbose = false
     Boolean quiet = true
-    Boolean includeTestSourceDirectory = false
-    String inputEncoding = "UTF-8"
-    ScalaStyleUtils scalaStyleUtils = new ScalaStyleUtils()
-    String testSource
-    FileTree testSourceDir
 
     ScalaStyleTask() {
         super()
@@ -48,14 +43,15 @@ class ScalaStyleTask extends SourceTask {
     }
 
     @TaskAction
-    def scalaStyle() {
+    def scalastyle() {
+        println("in scalastyle task for " + name);
+        return
         extractAndValidateProperties()
         if (!skip) {
             try {
                 def startMs = System.currentTimeMillis()
                 def configuration = ScalastyleConfiguration.readFromXml(configLocation)
-                def fileToProcess = scalaStyleUtils.getFilesToProcess(source.getFiles().toList(), testSourceDir.getFiles().toList(), inputEncoding, includeTestSourceDirectory)
-                def messages = new ScalastyleChecker().checkFiles(configuration, fileToProcess)
+                def messages = new ScalastyleChecker().checkFilesAsJava(configuration, getSource().files.toList())
                 def outputResult = new TextOutput(verbose, quiet).output(messages)
 
                 getLogger().debug("Saving to outputFile={}", project.file(outputFile).getCanonicalPath());
@@ -93,24 +89,10 @@ class ScalaStyleTask extends SourceTask {
     }
 
     private void extractAndValidateProperties() {
-        if (configLocation == null) {
-            throw new Exception("No Scalastyle configuration file provided")
-        }
-
-        if (source == null) {
-            throw new Exception("Specify Scala source set")
-        }
-
-        if (includeTestSourceDirectory && testSource == null) {
-            testSourceDir = project.fileTree(project.projectDir.absolutePath + "/src/test/scala")
-        } else {
-            testSourceDir = project.fileTree(project.projectDir.absolutePath + "/" + testSource)
-        }
 
         if (!new File(configLocation).exists()) {
             throw new Exception("configLocation " + configLocation + " does not exist")
         }
-
 
         if (buildDirectory == null) {
             buildDirectory = project.buildDir
@@ -135,7 +117,6 @@ class ScalaStyleTask extends SourceTask {
             getLogger().info("verbose: {}", verbose)
             getLogger().info("quiet: {}", quiet)
             getLogger().info("skip: {}", skip)
-            getLogger().info("includeTestSourceDirectory: {}", includeTestSourceDirectory)
             getLogger().info("inputEncoding: {}", inputEncoding)
         }
     }
