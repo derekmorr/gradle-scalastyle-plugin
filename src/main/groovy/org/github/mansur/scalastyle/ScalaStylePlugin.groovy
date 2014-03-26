@@ -1,5 +1,4 @@
 /*
- * Copyright 2013. Muhammad Ashraf
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
  *    You may obtain a copy of the License at
@@ -16,25 +15,19 @@ package org.github.mansur.scalastyle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.file.SourceDirectorySet
-import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.scala.ScalaBasePlugin
-import org.gradle.api.plugins.scala.ScalaPlugin
 import org.gradle.api.tasks.ScalaRuntime
 import org.gradle.api.tasks.SourceSet
-import org.gradle.api.tasks.TaskInstantiationException
-
 
 /**
- * @author Muhammad Ashraf
- * @since 5/11/13
+ *
  */
-class ScalaStylePlugin implements Plugin<Project> {
+class ScalastylePlugin implements Plugin<Project> {
 
     static final String DEFAULT_CONFIG_FILE = "config/scalastyle/scalastyle_config.xml";
     private static final String DEFAULT_VERSION = "0.4.0"
 
-    private ScalaStyleExtension extension
+    private ScalastyleExtension extension
     private Project project
 
     Set<SourceSet> testSourceSets
@@ -47,45 +40,6 @@ class ScalaStylePlugin implements Plugin<Project> {
     void apply(Project project) {
 
         this.project = project
-
-        // the scala plugin is required
-        if (!project.plugins.hasPlugin("scala")) {
-            throw new TaskInstantiationException("Scala plugin has to be applied before ScalaStyle plugin")
-        }
-
-        mainSourceSets = [project.sourceSets.main] as Set<SourceSet>
-        testSourceSets = [project.sourceSets.test] as Set<SourceSet>
-
-        def allScalaSourceDirs = mainSourceSets*.allScala.srcDirs.flatten() // as Set<SourceDirectorySet>;
-
-        for (File f: allScalaSourceDirs) {
-            println(f.absolutePath);
-        }
-
-        def scalaDirSets = mainSourceSets*.allScala.flatten()
-        def mainScalaFiles = []
-        for (SourceDirectorySet dirSet : scalaDirSets) {
-            println(dirSet.name);
-            for (File f : dirSet.files) {
-                println("    " + f.absolutePath)
-                mainScalaFiles.add(f.absolutePath)
-            }
-        }
-
-        println(mainScalaFiles.size())
-
-        /*
-        for (Object o : project.plugins.toArray()) {
-            println o.toString()
-        }
-        */
-
-        project.task(type: ScalaStyleTask, toolName.toLowerCase())
-        project.tasks.scalastyle.outputs.upToDateWhen { false }
-
-        scalaRuntime = (ScalaRuntime) project.extensions.getByName(ScalaBasePlugin.SCALA_RUNTIME_EXTENSION_NAME)
-
-        println("Scala version: " + scalaRuntime)
 
         createConfigurations()
         extension = createExtension()
@@ -111,8 +65,8 @@ class ScalaStylePlugin implements Plugin<Project> {
         return ScalaStyleTask
     }
 
-    protected ScalaStyleExtension createExtension() {
-        extension = project.extensions.create(toolName.toLowerCase(), ScalaStyleExtension)
+    protected ScalastyleExtension createExtension() {
+        extension = project.extensions.create(toolName.toLowerCase(), ScalastyleExtension)
 
         extension.with {
             toolVersion = DEFAULT_VERSION
@@ -149,15 +103,13 @@ class ScalaStylePlugin implements Plugin<Project> {
             }
         }
 
-        /*
         task.conventionMapping.with {
-            checkstyleClasspath = { conf }
             configFile = { extension.configFile }
-            configProperties = { extension.configProperties }
             ignoreFailures = { extension.ignoreFailures }
             showViolations = { extension.showViolations }
         }
 
+        /*
         task.reports.xml.conventionMapping.with {
             enabled = { true }
             destination = { new File(extension.reportsDir, "${baseName}.xml") }
@@ -176,7 +128,6 @@ class ScalaStylePlugin implements Plugin<Project> {
     private void configureSourceSetRule() {
         project.plugins.withType(ScalaBasePlugin.class) {
             project.sourceSets.all { SourceSet sourceSet ->
-                println("creating task: " + sourceSet.getTaskName(taskBaseName, null))
                 ScalaStyleTask task = project.tasks.create(sourceSet.getTaskName(taskBaseName, null), taskType)
                 configureForSourceSet(sourceSet, task)
             }

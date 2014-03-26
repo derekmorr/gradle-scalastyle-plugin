@@ -1,5 +1,4 @@
 /*
- * Copyright 2013. Muhammad Ashraf
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
  *    You may obtain a copy of the License at
@@ -15,9 +14,11 @@
 package org.github.mansur.scalastyle
 
 import org.gradle.api.GradleException
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.SourceTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.VerificationTask
+
 import org.scalastyle.Directory
 import org.scalastyle.FileSpec
 import org.scalastyle.ScalastyleChecker
@@ -32,55 +33,58 @@ class ScalaStyleTask extends SourceTask implements VerificationTask {
     String outputFile
     String outputEncoding = "UTF-8"
 
-    ScalaStyleTask() {
-        super()
-        setDescription("Scalastyle examines your Scala code and indicates potential problems with it.")
-    }
+    @InputFile
+    File configFile
 
     /**
      * Whether or not this task will ignore failures and continue running the build.
      */
     boolean ignoreFailures
 
+    /**
+     * Whether or not rule violations are to be displayed on the console.
+     */
+    boolean showViolations = true
+
+    ScalaStyleTask() {
+        super()
+        setDescription("Scalastyle examines your Scala code and indicates potential problems with it.")
+    }
+
     @TaskAction
     def scalastyle() {
-        println("in scalastyle task for " + name)
         extractAndValidateProperties()
+        def outputResult
         try {
-            def configuration = ScalastyleConfiguration.readFromXml(configLocation)
+            def configuration = ScalastyleConfiguration.readFromXml(getConfigFile().absolutePath)
             List<FileSpec> files = Directory.getFilesAsJava(scala.Option.apply(null), getSource().files.asList())
             def messages = new ScalastyleChecker().checkFilesAsJava(configuration, files)
-            def outputResult = new TextOutput(verbose, quiet).output(messages)
+            outputResult = new TextOutput(false, false).output(messages)
 
-            getLogger().debug("Saving to outputFile={}", project.file(outputFile).getCanonicalPath());
-            XmlOutput.save(outputFile, outputEncoding, messages)
+            // for now, we have to print results to get the error count
+            /*
+            if (showViolations) {
+                outputResult.output(messages)
+            }
+            */
 
-            def violations = outputResult.errors() + ((failOnWarning) ? outputResult.warnings() : 0)
-
-            processViolations(violations)
+            //XmlOutput.save(outputFile, outputEncoding, messages)
         } catch (Exception e) {
             throw new GradleException("Scala check error", e)
         }
-    }
 
-    private void processViolations(int violations) {
-        if (violations > 0) {
-            if (ignoreFailures) {
-                throw new GradleException("You have $violations Scalastyle violation(s).")
-            } else {
-                project.getLogger().warn("Scalastyle:check violations detected but failOnViolation set to " + failOnViolation)
-            }
-        } else {
-            project.getLogger().debug("Scalastyle:check no violations found")
+        if (outputResult.errors() > 0 && !getIgnoreFailures()) {
+            throw new GradleException("Scalastyle rule violations were found.")
         }
     }
 
     private void extractAndValidateProperties() {
 
-        if (!new File(configLocation).exists()) {
-            throw new Exception("configLocation " + configLocation + " does not exist")
+        if (!getConfigFile().exists()) {
+            throw new GradleException("configFile $configFile does not exist")
         }
 
+        /*
         if (buildDirectory == null) {
             buildDirectory = project.buildDir
         }
@@ -88,5 +92,6 @@ class ScalaStyleTask extends SourceTask implements VerificationTask {
         if (outputFile == null) {
             outputFile = buildDirectory.absolutePath + "/scala_style_result.xml"
         }
+        */
     }
 }
