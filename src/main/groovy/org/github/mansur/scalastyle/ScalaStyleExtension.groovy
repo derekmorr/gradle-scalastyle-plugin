@@ -1,5 +1,4 @@
 /*
- * Copyright 2013. Derek Morr
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
  *    You may obtain a copy of the License at
@@ -19,18 +18,12 @@ import org.gradle.api.plugins.quality.CodeQualityExtension
 /**
  * Extension adapted from Gradle's CheckstyleExtension
  */
-class ScalaStyleExtension extends CodeQualityExtension {
+class ScalastyleExtension extends CodeQualityExtension {
 
     /**
-     * The Sheckstyle configuration file to use.
+     * The Scalastyle configuration file to use.
      */
     File configFile
-
-    /**
-     * The properties available for use in the configuration file. These are substituted into the configuration
-     * file.
-     */
-    Map<String, Object> configProperties = [:]
 
     /**
      * Whether or not rule violations are to be displayed on the console. Defaults to <tt>true</tt>.
