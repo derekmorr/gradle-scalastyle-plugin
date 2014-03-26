@@ -106,7 +106,6 @@ class ScalastylePlugin implements Plugin<Project> {
         task.conventionMapping.with {
             configFile = { extension.configFile }
             ignoreFailures = { extension.ignoreFailures }
-            showViolations = { extension.showViolations }
         }
 
         /*

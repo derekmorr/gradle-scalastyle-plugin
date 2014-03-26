@@ -24,11 +24,4 @@ class ScalastyleExtension extends CodeQualityExtension {
      * The Scalastyle configuration file to use.
      */
     File configFile
-
-    /**
-     * Whether or not rule violations are to be displayed on the console. Defaults to <tt>true</tt>.
-     *
-     * Example: showViolations = false
-     */
-    boolean showViolations = true
 }

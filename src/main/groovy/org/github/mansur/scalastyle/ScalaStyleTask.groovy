@@ -41,11 +41,6 @@ class ScalaStyleTask extends SourceTask implements VerificationTask {
      */
     boolean ignoreFailures
 
-    /**
-     * Whether or not rule violations are to be displayed on the console.
-     */
-    boolean showViolations = true
-
     ScalaStyleTask() {
         super()
         setDescription("Scalastyle examines your Scala code and indicates potential problems with it.")
@@ -60,13 +55,6 @@ class ScalaStyleTask extends SourceTask implements VerificationTask {
             List<FileSpec> files = Directory.getFilesAsJava(scala.Option.apply(null), getSource().files.asList())
             def messages = new ScalastyleChecker().checkFilesAsJava(configuration, files)
             outputResult = new TextOutput(false, false).output(messages)
-
-            // for now, we have to print results to get the error count
-            /*
-            if (showViolations) {
-                outputResult.output(messages)
-            }
-            */
 
             //XmlOutput.save(outputFile, outputEncoding, messages)
         } catch (Exception e) {
