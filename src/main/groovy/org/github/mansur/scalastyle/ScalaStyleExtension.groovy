@@ -14,37 +14,15 @@
  */
 package org.github.mansur.scalastyle
 
-import org.gradle.api.tasks.SourceSet
+import org.gradle.api.plugins.quality.CodeQualityExtension
 
 /**
- * Extension merged from Gradle's internal CodeQualityExtension and CheckstyleExtension
+ * Extension adapted from Gradle's CheckstyleExtension
  */
-class ScalaStyleExtension {
+class ScalaStyleExtension extends CodeQualityExtension {
 
     /**
-     * The version of the code quality tool to be used.
-     */
-    String toolVersion
-
-    /**
-     * The source sets to be analyzed as part of the <tt>check</tt> and <tt>build</tt> tasks.
-     */
-    Collection<SourceSet> sourceSets
-
-    /**
-     * Whether or not to allow the build to continue if there are warnings.
-     *
-     * Example: ignoreFailures = true
-     */
-    boolean ignoreFailures = false
-
-    /**
-     * The directory where reports will be generated.
-     */
-    File reportsDir
-
-    /**
-     * The Checkstyle configuration file to use.
+     * The Sheckstyle configuration file to use.
      */
     File configFile
 
