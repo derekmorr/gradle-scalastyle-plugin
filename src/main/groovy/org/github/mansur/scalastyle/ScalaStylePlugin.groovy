@@ -65,6 +65,10 @@ class ScalastylePlugin implements Plugin<Project> {
         return ScalaStyleTask
     }
 
+    protected Class<ScalaBasePlugin> getBasePlugin() {
+        return ScalaBasePlugin
+    }
+
     protected ScalastyleExtension createExtension() {
         extension = project.extensions.create(toolName.toLowerCase(), ScalastyleExtension)
 
@@ -125,7 +129,7 @@ class ScalastylePlugin implements Plugin<Project> {
     }
 
     private void configureSourceSetRule() {
-        project.plugins.withType(ScalaBasePlugin.class) {
+        project.plugins.withType(basePlugin) {
             project.sourceSets.all { SourceSet sourceSet ->
                 ScalaStyleTask task = project.tasks.create(sourceSet.getTaskName(taskBaseName, null), taskType)
                 configureForSourceSet(sourceSet, task)
@@ -141,8 +145,8 @@ class ScalastylePlugin implements Plugin<Project> {
     }
 
     private void configureCheckTask() {
-        project.plugins.withType(ScalaBasePlugin.class) {
-           project.tasks['check'].dependsOn { extension.sourceSets.collect { it.getTaskName(toolName.toLowerCase(), null) }}
+        project.plugins.withType(basePlugin) {
+           project.tasks['check'].dependsOn { extension.sourceSets.collect { it.getTaskName(taskBaseName, null) }}
         }
     }
 }
