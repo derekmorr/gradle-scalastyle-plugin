@@ -11,7 +11,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.github.mansur.scalastyle
+package org.scalastyle.gradle.plugin
 
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.InputFile
