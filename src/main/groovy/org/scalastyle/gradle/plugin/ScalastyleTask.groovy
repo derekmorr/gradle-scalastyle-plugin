@@ -29,7 +29,7 @@ import org.scalastyle.XmlOutput
 /**
  * Runs Scalastyle against some source files.
  */
-class ScalaStyleTask extends SourceTask implements VerificationTask {
+class ScalastyleTask extends SourceTask implements VerificationTask {
     String outputFile
     String outputEncoding = "UTF-8"
 
@@ -41,7 +41,7 @@ class ScalaStyleTask extends SourceTask implements VerificationTask {
      */
     boolean ignoreFailures
 
-    ScalaStyleTask() {
+    ScalastyleTask() {
         super()
         setDescription("Scalastyle examines your Scala code and indicates potential problems with it.")
     }

@@ -61,8 +61,8 @@ class ScalastylePlugin implements Plugin<Project> {
         return toolName.toLowerCase()
     }
 
-    protected Class<ScalaStyleTask> getTaskType() {
-        return ScalaStyleTask
+    protected Class<ScalastyleTask> getTaskType() {
+        return ScalastyleTask
     }
 
     protected Class<ScalaBasePlugin> getBasePlugin() {
@@ -83,7 +83,7 @@ class ScalastylePlugin implements Plugin<Project> {
     private void configureExtensionRule() {
         extension.conventionMapping.with {
             sourceSets = { [] }
-            //reportsDir = { project.extensions.getByType(ReportingExtension).file(reportName) }
+            reportsDir = { project.extensions.getByType(ReportingExtension).file(reportName) }
         }
 
         project.plugins.withType(ScalaBasePlugin.class) {
@@ -92,14 +92,14 @@ class ScalastylePlugin implements Plugin<Project> {
     }
 
     private void configureTaskRule() {
-        project.tasks.withType(ScalaStyleTask.class) { ScalaStyleTask task ->
+        project.tasks.withType(ScalastyleTask.class) { ScalastyleTask task ->
             def prunedName = (task.name - taskBaseName ?: task.name)
             prunedName = prunedName[0].toLowerCase() + prunedName.substring(1)
             configureTaskDefaults(task, prunedName)
         }
     }
 
-    protected void configureTaskDefaults(ScalaStyleTask task, String baseName) {
+    protected void configureTaskDefaults(ScalastyleTask task, String baseName) {
         def conf = project.configurations['scalastyle']
         conf.incoming.beforeResolve {
             if (conf.dependencies.empty) {
@@ -131,13 +131,13 @@ class ScalastylePlugin implements Plugin<Project> {
     private void configureSourceSetRule() {
         project.plugins.withType(basePlugin) {
             project.sourceSets.all { SourceSet sourceSet ->
-                ScalaStyleTask task = project.tasks.create(sourceSet.getTaskName(taskBaseName, null), taskType)
+                ScalastyleTask task = project.tasks.create(sourceSet.getTaskName(taskBaseName, null), taskType)
                 configureForSourceSet(sourceSet, task)
             }
         }
     }
 
-    protected void configureForSourceSet(SourceSet sourceSet, ScalaStyleTask task) {
+    protected void configureForSourceSet(SourceSet sourceSet, ScalastyleTask task) {
         task.with {
             description = "Run $toolName analysis for ${sourceSet.name} classes"
         }
